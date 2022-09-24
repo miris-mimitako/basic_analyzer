@@ -1,6 +1,6 @@
 body {
-  margin-left: 3%;
-  margin-right: 3%;
+  margin-left: 5%;
+  margin-right: 5%;
   background-color: #cdcef3;
   font-family: "Courier New", "Meiryo UI";
   overflow: scroll;
@@ -52,6 +52,7 @@ table td {
 
 img {
   width: 100%;
+  max-width: 840px;
   height: auto;
   margin: auto;
 }
