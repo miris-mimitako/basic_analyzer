@@ -1,0 +1,58 @@
+body {
+  margin-left: 3%;
+  margin-right: 3%;
+  background-color: #cdcef3;
+  font-family: "Courier New", "Meiryo UI";
+  overflow: scroll;
+}
+
+p {
+  padding-left: 2%;
+  color: #1f1e2b;
+  font-size: 14px;
+}
+
+code {
+  font-size: 0.8em;
+  color: #1f1e2b;
+  font-family: "Courier New";
+}
+
+h1 {
+  font-weight: bold;
+  border-bottom: double 5px #040444;
+}
+
+h2 {
+  font-weight: bold;
+  border-bottom: solid 2px #040444;
+}
+
+table {
+  border: solid 2px #040444;
+  display: block;
+  overflow-x: scroll;
+  white-space: nowrap;
+}
+
+table th {
+  border-bottom: 1px dashed #040444;
+  padding: 0px 8px;
+  border-left: 1px dashed #bdbdbd;
+  text-align: center !important;
+}
+
+table td {
+  font-size: 0.8em;
+  padding: 8px 8px;
+  border-bottom: 1px dashed #929297;
+  border-left: 1px dashed #bdbdbd;
+  text-align: right !important;
+}
+
+img {
+  width: 100%;
+  height: auto;
+  margin: auto;
+}
+/*# sourceMappingURL=style.css.map */

@@ -1,0 +1,58 @@
+// ver1.0 2022/09/24
+
+body {
+  margin-left:3%;
+  margin-right:3%;
+  background-color: rgb(205, 206, 243);
+  font-family: "Courier New", "Meiryo UI";
+  overflow: scroll;
+}
+
+p {
+  padding-left: 2%;
+  color:rgb(31, 30, 43);
+  font-size: 14px;
+}
+
+code {
+  font-size: 0.8em;
+  color:rgb(31, 30, 43);
+  font-family:"Courier New";
+}
+
+h1 {
+  font-weight: bold;
+  border-bottom: double 5px rgb(4, 4, 68);
+}
+
+h2 {
+  font-weight:bold;
+  border-bottom: solid 2px rgb(4, 4, 68);
+}
+
+table {
+  border: solid 2px rgb(4, 4, 68);
+  display: block;
+  overflow-x: scroll;
+  white-space: nowrap;
+  th {
+    border-bottom: 1px dashed rgb(4, 4, 68);
+    padding: 0px 8px;
+    border-left: 1px dashed rgb(189, 189, 189);
+    text-align: center !important;
+  }
+
+  td {
+    font-size: 0.8em;
+    padding: 8px 8px;
+    border-bottom: 1px dashed rgb(146, 146, 151);
+    border-left: 1px dashed rgb(189, 189, 189);
+    text-align: right !important;
+  }
+}
+
+img {
+  width: 100%;
+  height: auto;
+  margin: auto;
+}
