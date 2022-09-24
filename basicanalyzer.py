@@ -143,81 +143,27 @@ class BasicAnalyze:
 
         for x_index, x_column_name in enumerate(list_num_columns):
           for y_index, y_column_name in enumerate(list_num_columns):
-            self.write_record(f'<h2 id = {self.id_count()}>Correlation between {x_column_name} and {y_column_name}</h2>')
-            self.write_record(f'<h3 id = {self.id_count()}>Scatter plot {x_column_name} and {y_column_name}</h3>')
+            if x_index < y_index :
+              self.write_record(f'<h2 id = {self.id_count()}>Correlation between {x_column_name} and {y_column_name}</h2>')
 
+              # scatter plot
+              self.write_record(f'<h3 id = {self.id_count()}>Scatter plot {x_column_name} and {y_column_name}</h3>')
+              scatter_path = self.scatter_plot(x_column_name, y_column_name)
+              scatter_path = "." + scatter_path[scatter_path.rfind('\\'):]
+              self.write_record(f'<a href="{scatter_path}"><img alt="" src="{scatter_path}" /></a>')
 
-            scatter = self.scatter_plot(x_column_name, y_column_name)
-
-
-        break
-        GM = GraphMaker(self.create_folder_path, dfT, df, csv_path)
-
-
-
-
-        # Make graph 1 each
-        list_graph_data = GM.hist_plot()
-
-        for content in list_graph_data:
-          link = content = '.'+ content[content.rfind('\\'):]
-
-          text6 = (
-f"""
-## Histgram and Q-Q plot
-
-Histgram and Q-Q plot
-
-[![]({link})]({link})
-
-"""          
-          )
-          self.write_record(text6)
-
-        heat_map_path = GM.heat_map()
-        heat_map_path = '.'+ heat_map_path[heat_map_path.rfind('\\'):]
-        text2 = (
-f"""
-## Heatmap of correlation
-
-correlation overview
-
-[![]({heat_map_path})]({heat_map_path})
-
-"""          
-        )
-        self.write_record(text2)
-        list_scatter_path = GM.scatter_plot()
-        for content in list_scatter_path:
-          link = content = '.'+ content[content.rfind('\\'):]
-
-          text3 = (
-f"""
-## Scatter of correlation
-
-Scatter plot
-
-[![]({link})]({link})
-
-"""          
-          )
-          self.write_record(text3)
-        ##E for
-
-        SR = StatisticRecord(self.create_folder_path, dfT, df, csv_path)
-        text_result = SR.ols_record()
-
-        for text_data in text_result:
-          text4 = (f"<pre><code>\n\n{text_data}\n\n</code></pre>\n\n")
-          self.write_record(text4)
-
-        str_html_result = self.encoding_mark_down_to_html()
-        list_record.append(str_html_result)
-        list_record.append(csv_path)
-        list_record.append("")
-        pd.DataFrame([list_record]).to_csv(record_path, mode="a", header=False,index=False)
-
-
+              # ols analyze
+              self.write_record(f'<h3 id = {self.id_count()}>OLS analyzation {x_column_name} and {y_column_name}</h3>')
+              self.write_record('<p>This record is used by automatically removed Nan data.</p>')
+              self.write_record('<pre><code>')
+              str_ols_result = self.ols_record(x_column_name, y_column_name)
+              self.write_record(f'{str_ols_result}')
+              self.write_record('</code></pre>')
+            ##E if
+          ##E for ycolum
+        ##E for xcolumn
+      ##E for csv
+    ##E csv True
   ##E def
 
   def analyze_data_structure(self, dataframe):
@@ -367,108 +313,94 @@ Scatter plot
     fig.savefig(file_path)
     plt.close()
     return file_path
-    list_save_location = []
-    list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
-    # num_plots = len(self.df[list_index])
-    for xindex, x_column in enumerate(list_index):
-      for yindex, y_column in enumerate(list_index):
-        if xindex < yindex:
-          fig, ax = plt.subplots(1, 1,dpi = 300)
-          ax = sns.scatterplot(data = self.df , x = x_column, y=y_column)
-          # print (self.df.head(), "x", x_column, "y", y_column )
-          ax.set_title(x_column + " vs " + y_column)
-          file_path = os.path.join(self.save_file_location, self.csv_name + "-" + x_column + "_vs_" + y_column + "-" + "scatterplot.png")
-          fig.savefig(file_path)
-          plt.close()
-          list_save_location.append(file_path)
-      ##E for
-    ##E for
-    return list_save_location
 
-
-
+  def ols_record(self, x_column, y_column ):
+    df_freena = self.df.dropna()
+    model = sm.OLS(df_freena[y_column] ,df_freena[x_column])
+    res = model.fit()
+    return str(res.summary())
 
   def __del__(self):
     pass
 
-class StatisticRecord:
-  def __init__(self, location, dataframe, df, csv_path) -> None:
-    self.save_file_location = location
-    self.structure_data = dataframe # dataframe, 
-    self.df = df
-    self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
+# class StatisticRecord:
+#   def __init__(self, location, dataframe, df, csv_path) -> None:
+#     self.save_file_location = location
+#     self.structure_data = dataframe # dataframe, 
+#     self.df = df
+#     self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
 
-  def ols_record(self):
-    _df = self.df
-    list_record = []
-    _df.dropna(inplace=True)
-    for xindex, x_column in enumerate(_df.columns):
-      for yindex, y_column in enumerate(_df.columns):
-        if xindex < yindex:
-          if ("int" or "float") in str(_df[x_column].dtype) and ("int" or "float") in str(_df[y_column].dtype):
-            model = sm.OLS(_df[y_column] ,_df[x_column])
-            res = model.fit()
-            _text = x_column + "_vs_" + y_column + "\n\n" + str(res.summary()) 
-            list_record.append(_text)
-    return list_record
-  def __del__(self):
-    pass
+#   def ols_record(self):
+#     _df = self.df
+#     list_record = []
+#     _df.dropna(inplace=True)
+#     for xindex, x_column in enumerate(_df.columns):
+#       for yindex, y_column in enumerate(_df.columns):
+#         if xindex < yindex:
+#           if ("int" or "float") in str(_df[x_column].dtype) and ("int" or "float") in str(_df[y_column].dtype):
+#             model = sm.OLS(_df[y_column] ,_df[x_column])
+#             res = model.fit()
+#             _text = x_column + "_vs_" + y_column + "\n\n" + str(res.summary()) 
+#             list_record.append(_text)
+#     return list_record
+#   def __del__(self):
+#     pass
 
-class GraphMaker:
-  def __init__(self, location, dataframe, df, csv_path) -> None:
-    self.save_file_location = location
-    self.structure_data = dataframe # dataframe, 
-    self.df = df
-    self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
+# class GraphMaker:
+#   def __init__(self, location, dataframe, df, csv_path) -> None:
+#     self.save_file_location = location
+#     self.structure_data = dataframe # dataframe, 
+#     self.df = df
+#     self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
 
 
-  def heat_map(self) -> str:
-    list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
-    fig, ax = plt.subplots(1,1, dpi = 300)
-    ax = sns.heatmap(data = self.df[list_index].corr(), annot= True)
-    file_path = os.path.join(self.save_file_location, self.csv_name + "-" + "heatmap.png")
-    fig.savefig(file_path)
-    plt.close()
-    return file_path
+#   def heat_map(self) -> str:
+#     list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
+#     fig, ax = plt.subplots(1,1, dpi = 300)
+#     ax = sns.heatmap(data = self.df[list_index].corr(), annot= True)
+#     file_path = os.path.join(self.save_file_location, self.csv_name + "-" + "heatmap.png")
+#     fig.savefig(file_path)
+#     plt.close()
+#     return file_path
 
-  def scatter_plot(self)->list:
-    list_save_location = []
-    list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
-    # num_plots = len(self.df[list_index])
-    for xindex, x_column in enumerate(list_index):
-      for yindex, y_column in enumerate(list_index):
-        if xindex < yindex:
-          fig, ax = plt.subplots(1, 1,dpi = 300)
-          ax = sns.scatterplot(data = self.df , x = x_column, y=y_column)
-          # print (self.df.head(), "x", x_column, "y", y_column )
-          ax.set_title(x_column + " vs " + y_column)
-          file_path = os.path.join(self.save_file_location, self.csv_name + "-" + x_column + "_vs_" + y_column + "-" + "scatterplot.png")
-          fig.savefig(file_path)
-          plt.close()
-          list_save_location.append(file_path)
-      ##E for
-    ##E for
-    return list_save_location
+#   def scatter_plot(self)->list:
+#     list_save_location = []
+#     list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
+#     # num_plots = len(self.df[list_index])
+#     for xindex, x_column in enumerate(list_index):
+#       for yindex, y_column in enumerate(list_index):
+#         if xindex < yindex:
+#           fig, ax = plt.subplots(1, 1,dpi = 300)
+#           ax = sns.scatterplot(data = self.df , x = x_column, y=y_column)
+#           # print (self.df.head(), "x", x_column, "y", y_column )
+#           ax.set_title(x_column + " vs " + y_column)
+#           file_path = os.path.join(self.save_file_location, self.csv_name + "-" + x_column + "_vs_" + y_column + "-" + "scatterplot.png")
+#           fig.savefig(file_path)
+#           plt.close()
+#           list_save_location.append(file_path)
+#       ##E for
+#     ##E for
+#     return list_save_location
 
-  def hist_plot(self):
-    list_save_location = []
+#   def hist_plot(self):
+#     list_save_location = []
 
-    list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
-    for column in list_index:
-      fig, (ax1, ax2) = plt.subplots(1,2, figsize = (20, 10))
-      sns.histplot(data = self.df, x = column, kde = True, ax = ax1)
-      sm.qqplot(self.df[column].values, ax=ax2)
+#     list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
+#     for column in list_index:
+#       fig, (ax1, ax2) = plt.subplots(1,2, figsize = (20, 10))
+#       sns.histplot(data = self.df, x = column, kde = True, ax = ax1)
+#       sm.qqplot(self.df[column].values, ax=ax2)
 
-      file_path = os.path.join(self.save_file_location, self.csv_name + "-" + column + "-" + "Q-Q_plot.png")
-      ax1.set_title("Histgram of " + column)
-      ax2.set_title("Q-Q plot of " + column)
-      fig.savefig(file_path)
-      plt.close()
-      list_save_location.append(file_path)
-    return list_save_location
+#       file_path = os.path.join(self.save_file_location, self.csv_name + "-" + column + "-" + "Q-Q_plot.png")
+#       ax1.set_title("Histgram of " + column)
+#       ax2.set_title("Q-Q plot of " + column)
+#       fig.savefig(file_path)
+#       plt.close()
+#       list_save_location.append(file_path)
+#     return list_save_location
 
-  def __del__(self):
-    pass
+#   def __del__(self):
+#     pass
 
 if __name__ =="__main__":
   BA = BasicAnalyze()
