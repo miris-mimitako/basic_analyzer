@@ -14,6 +14,7 @@ import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from see import see
 import scipy.stats as stats
+import shutil
 
 class BasicAnalyze:
   """
@@ -24,6 +25,7 @@ class BasicAnalyze:
     now = datetime.datetime.now()
     self.create_folder_path = os.path.join(pathlib.Path(__file__).parent, "record",now.strftime("analyzed_%Y%m%d-%H%M%S"))
     os.makedirs(self.create_folder_path, mode=0o777, exist_ok=True)
+    shutil.copy2(os.path.join(pathlib.Path(__file__).parent,"src","style.css"), os.path.join(self.create_folder_path,"style.css"))
     self.write_record("# This is analyzed record of CSV files.")
   
   def write_record(self, content):
@@ -37,10 +39,33 @@ class BasicAnalyze:
       sample = f.read()
       f.close()
 
-    md = markdown.Markdown(extensions=['tables'])
+    md = markdown.Markdown(extensions=['tables',"toc"])
 
     with open(os.path.join(self.create_folder_path,'result.html'), 'a') as f_html:
+      f_html.write(
+"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Document</title>
+</head>
+<body>
+\n\n
+"""
+      )
       f_html.write(md.convert(sample))
+      f_html.write(
+"""
+\n\n
+</body>
+</html>
+"""
+      )
+      
       f_html.close()
 
   def analyze(self,overwrite = False, csv_files = [], dataframe = None, *args, **kwargs):
@@ -129,7 +154,7 @@ Scatter plot
         text_result = SR.ols_record()
 
         for text_data in text_result:
-          text4 = (f"```\n\n{text_data}\n\n```\n\n")
+          text4 = (f"<pre><code>\n\n{text_data}\n\n</code></pre>\n\n")
           self.write_record(text4)
 
         self.encoding_mark_down_to_html()
@@ -324,7 +349,7 @@ class GraphMaker:
       fig, (ax1, ax2) = plt.subplots(1,2, figsize = (20, 10))
       sns.histplot(data = self.df, x = column, kde = True, ax = ax1)
       sm.qqplot(self.df[column].values, ax=ax2)
-      
+
       file_path = os.path.join(self.save_file_location, self.csv_name + "-" + column + "-" + "Q-Q_plot.png")
       ax1.set_title("Histgram of " + column)
       ax2.set_title("Q-Q plot of " + column)
