@@ -68,6 +68,8 @@ class BasicAnalyze:
       
       f_html.close()
 
+      return str(os.path.join(self.create_folder_path,'result.html'))
+
   def analyze(self,overwrite = False, csv_files = [], dataframe = None, *args, **kwargs):
     """
     overwrite: when true, change settings
@@ -75,7 +77,9 @@ class BasicAnalyze:
     dataframe: Pandas dataframe
     """
     settings_path = pathlib.Path(__file__).parent
-
+    record_path = os.path.join(pathlib.Path(__file__).parent, "record","record.csv")
+    
+    
     # read settings
     with open(os.path.join(settings_path,"settings.json"), 'r') as json_file:
       settings_data = json.load(json_file)
@@ -85,6 +89,10 @@ class BasicAnalyze:
       for csv_path in csv_files:
         self.df_record = pd.DataFrame(index=["Type", "Num_Data","Exist_Nan", "Data_Type", "Max", "Mean", "Min"])
         df = pd.read_csv(csv_path, encoding = settings_data["csv"]["encoding"])
+        list_record =[]
+        df_record_csv = pd.read_csv(record_path)
+        list_record.append(len(df_record_csv)+1)
+        list_record.append(self.create_folder_path)
         self.analyze_data_structure(df)
         print(self.df_record)
         text = (
@@ -93,7 +101,7 @@ class BasicAnalyze:
 
 csv file: {csv_path} 
 
-### overview
+## overview
           """)
         self.write_record(text)
         self.write_record(self.df_record.to_markdown())
@@ -110,7 +118,7 @@ csv file: {csv_path}
 
           text6 = (
 f"""
-#### Histgram and Q-Q plot
+## Histgram and Q-Q plot
 
 Histgram and Q-Q plot
 
@@ -124,7 +132,7 @@ Histgram and Q-Q plot
         heat_map_path = '.'+ heat_map_path[heat_map_path.rfind('\\'):]
         text2 = (
 f"""
-#### Heatmap of correlation
+## Heatmap of correlation
 
 correlation overview
 
@@ -139,7 +147,7 @@ correlation overview
 
           text3 = (
 f"""
-#### Scatter of correlation
+## Scatter of correlation
 
 Scatter plot
 
@@ -157,7 +165,12 @@ Scatter plot
           text4 = (f"<pre><code>\n\n{text_data}\n\n</code></pre>\n\n")
           self.write_record(text4)
 
-        self.encoding_mark_down_to_html()
+        str_html_result = self.encoding_mark_down_to_html()
+        list_record.append(str_html_result)
+        list_record.append(csv_path)
+        list_record.append("")
+        pd.DataFrame([list_record]).to_csv(record_path, mode="a", header=False,index=False)
+
 
   ##E def
 
@@ -363,5 +376,5 @@ class GraphMaker:
 
 if __name__ =="__main__":
   BA = BasicAnalyze()
-  BA.analyze(csv_files = [r".\test.csv"])
+  BA.analyze(csv_files = [r".\test.csv",r".\test.csv"])
 
