@@ -26,13 +26,36 @@ class BasicAnalyze:
     self.create_folder_path = os.path.join(pathlib.Path(__file__).parent, "record",now.strftime("analyzed_%Y%m%d-%H%M%S"))
     os.makedirs(self.create_folder_path, mode=0o777, exist_ok=True)
     shutil.copy2(os.path.join(pathlib.Path(__file__).parent,"src","style.css"), os.path.join(self.create_folder_path,"style.css"))
-    self.write_record("# This is analyzed record of CSV files.")
-  
+    # HTML initialize
+    self.id = 0
+    self.write_record("<!DOCTYPE html>")
+    self.write_record('<html lang="en">')
+    self.write_record('<head>')
+    self.write_record('<meta charset="UTF-8">')
+    self.write_record('<meta http-equiv="X-UA-Compatible" content="IE=edge">')
+    self.write_record('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
+    self.write_record('<link rel="stylesheet" href="style.css">')
+    time_text = now.strftime("%Y%m%d-%H%M%S")
+    self.write_record(f'<title>Record {time_text}</title>')
+    self.write_record('</head>')
+    self.write_record('<body>')
+    self.write_record('<main>')
+    self.write_record(f'<h1 id = {self.id_count()}>Record</h1>')
+
+  ##E def 
+  def id_count(self):
+    self.id +=1
+    return self.id
+
   def write_record(self, content):
-    with open(os.path.join(self.create_folder_path,'result.md'), 'a', encoding="utf-8") as f:
-      f.write(content)
-      f.write("\n\n")
-      f.close()
+    with open(os.path.join(self.create_folder_path,'result.html'), 'a', encoding="utf-8") as f_html:
+      f_html.write(content)
+      f_html.write("\n")
+      f_html.close()
+    # with open(os.path.join(self.create_folder_path,'result.md'), 'a', encoding="utf-8") as f:
+    #   f.write(content)
+    #   f.write("\n\n")
+    #   f.close()
 
   def encoding_mark_down_to_html(self):
     with open(os.path.join(self.create_folder_path,'result.md'), "r") as f:
@@ -42,21 +65,9 @@ class BasicAnalyze:
     md = markdown.Markdown(extensions=['tables',"toc"])
 
     with open(os.path.join(self.create_folder_path,'result.html'), 'a') as f_html:
-      f_html.write(
-"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <title>Document</title>
-</head>
-<body>
-\n\n
-"""
-      )
+      # f_html.write(
+
+      # )
       f_html.write(md.convert(sample))
       f_html.write(
 """
@@ -87,28 +98,63 @@ class BasicAnalyze:
     # csv files
     if csv_files:
       for csv_path in csv_files:
+        # csv file name
+        self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
+
         self.df_record = pd.DataFrame(index=["Type", "Num_Data","Exist_Nan", "Data_Type", "Max", "Mean", "Min"])
-        df = pd.read_csv(csv_path, encoding = settings_data["csv"]["encoding"])
+        
+        # dataframe of csv
+        self.df = pd.read_csv(csv_path, encoding = settings_data["csv"]["encoding"])
+
+        # record history
         list_record =[]
         df_record_csv = pd.read_csv(record_path)
         list_record.append(len(df_record_csv)+1)
         list_record.append(self.create_folder_path)
-        self.analyze_data_structure(df)
-        print(self.df_record)
-        text = (
-          f"""
-## csv file analyzed record
 
-csv file: {csv_path} 
-
-## overview
-          """)
-        self.write_record(text)
-        self.write_record(self.df_record.to_markdown())
-
+        # write record
+        self.analyze_data_structure(self.df)
+        self.write_record(f'<h2 id = {self.id_count()}>Applicable CSV file</h2>')
+        self.write_record(f'<p>csv file: {csv_path}</p>')
+        self.write_record(self.df_record.to_html())
+        
         # Make Graph
         dfT = self.df_record.T
+        list_num_columns = dfT[dfT.Data_Type.str.contains('Int') | dfT.Data_Type.str.contains('Float') | dfT.Data_Type.str.contains('Date')].index
+        
+        # Heat map
+        heatmap_path = self.heat_map(list_num_columns)
+        heatmap_path = "." + heatmap_path[heatmap_path.rfind('\\'):]
+
+        self.write_record(f'<h2 id = {self.id_count()}>Heat Map / Correlations</h2>')
+        self.write_record(f'<a href="{heatmap_path}"><img alt="" src="{heatmap_path}" /></a>')
+        
+        # Each column data analysis
+        for column_name in list_num_columns:
+          # Histgram
+          hist_path = self.hist_plot(column_name)
+          hist_path = "." + hist_path[hist_path.rfind('\\'):]
+          self.write_record(f'<h2 id = {self.id_count()}>Histgram for {column_name}</h2>')
+          self.write_record(f'<p>This is histgram and Q-Q plot of {column_name}</p>')
+          self.write_record(f'<a href="{hist_path}"><img alt="" src="{hist_path}" /></a>')
+        ##E for
+
+        # Correlation data analysis
+
+        for x_index, x_column_name in enumerate(list_num_columns):
+          for y_index, y_column_name in enumerate(list_num_columns):
+            self.write_record(f'<h2 id = {self.id_count()}>Correlation between {x_column_name} and {y_column_name}</h2>')
+            self.write_record(f'<h3 id = {self.id_count()}>Scatter plot {x_column_name} and {y_column_name}</h3>')
+
+
+            scatter = self.scatter_plot(x_column_name, y_column_name)
+
+
+        break
         GM = GraphMaker(self.create_folder_path, dfT, df, csv_path)
+
+
+
 
         # Make graph 1 each
         list_graph_data = GM.hist_plot()
@@ -291,6 +337,57 @@ Scatter plot
     df.loc["Data_Type"] = "Datetime Data"
     self.df_record = pd.concat([self.df_record,df], axis = 1)
   ##E def
+
+  ### Make graph
+  def heat_map(self, list_num_columns) -> str:
+    fig, ax = plt.subplots(1,1, dpi = 300)
+    ax = sns.heatmap(data = self.df[list_num_columns].corr(), annot= True)
+    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + "heatmap.png")
+    fig.savefig(file_path)
+    plt.close()
+    return file_path
+
+  def hist_plot(self, column_name):
+    fig, (ax1, ax2) = plt.subplots(1,2, figsize = (20, 10))
+    sns.histplot(data = self.df, x = column_name, kde = True, ax = ax1)
+    sm.qqplot(self.df[column_name].values, ax=ax2)
+
+    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + column_name + "-" + "Q-Q_plot.png")
+    ax1.set_title("Histgram of " + column_name)
+    ax2.set_title("Q-Q plot of " + column_name)
+    fig.savefig(file_path)
+    plt.close()
+    return file_path
+
+  def scatter_plot(self,x_column, y_column)->list:
+    fig, ax = plt.subplots(1, 1,dpi = 300)
+    ax = sns.scatterplot(data = self.df , x = x_column, y=y_column)
+    ax.set_title(x_column + " vs " + y_column)
+    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + x_column + "_vs_" + y_column + "-" + "scatterplot.png")
+    fig.savefig(file_path)
+    plt.close()
+    return file_path
+    list_save_location = []
+    list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
+    # num_plots = len(self.df[list_index])
+    for xindex, x_column in enumerate(list_index):
+      for yindex, y_column in enumerate(list_index):
+        if xindex < yindex:
+          fig, ax = plt.subplots(1, 1,dpi = 300)
+          ax = sns.scatterplot(data = self.df , x = x_column, y=y_column)
+          # print (self.df.head(), "x", x_column, "y", y_column )
+          ax.set_title(x_column + " vs " + y_column)
+          file_path = os.path.join(self.save_file_location, self.csv_name + "-" + x_column + "_vs_" + y_column + "-" + "scatterplot.png")
+          fig.savefig(file_path)
+          plt.close()
+          list_save_location.append(file_path)
+      ##E for
+    ##E for
+    return list_save_location
+
+
+
+
   def __del__(self):
     pass
 
@@ -316,7 +413,6 @@ class StatisticRecord:
     return list_record
   def __del__(self):
     pass
-
 
 class GraphMaker:
   def __init__(self, location, dataframe, df, csv_path) -> None:
