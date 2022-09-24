@@ -10,6 +10,8 @@ from enum import Enum
 import glob
 import datetime
 import markdown
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
 
 class BasicAnalyze:
@@ -24,7 +26,7 @@ class BasicAnalyze:
     self.write_record("# This is analyzed record of CSV files.")
   
   def write_record(self, content):
-    with open(os.path.join(self.create_folder_path,'result.md'), 'a') as f:
+    with open(os.path.join(self.create_folder_path,'result.md'), 'a', encoding="utf-8") as f:
       f.write(content)
       f.write("\n\n")
       f.close()
@@ -40,7 +42,7 @@ class BasicAnalyze:
       f_html.write(md.convert(sample))
       f_html.close()
 
-  def settings(self,overwrite = False, csv_files = [], dataframe = None, *args, **kwargs):
+  def analyze(self,overwrite = False, csv_files = [], dataframe = None, *args, **kwargs):
     """
     overwrite: when true, change settings
     csv_files: csv file path(s) list
@@ -69,7 +71,41 @@ csv file: {csv_path}
           """)
         self.write_record(text)
         self.write_record(self.df_record.to_markdown())
+
+        # Make Graph
+        dfT = self.df_record.T
+        GM = GraphMaker(self.create_folder_path, dfT, df, csv_path)
+        heat_map_path = GM.heat_map()
+        heat_map_path = '.'+ heat_map_path[heat_map_path.rfind('\\'):]
+        text2 = (
+f"""
+#### Heatmap of correlation
+
+correlation overview
+
+[![]({heat_map_path})]({heat_map_path})
+
+"""          
+        )
+        self.write_record(text2)
+        list_scatter_path = GM.scatter_plot()
+        for content in list_scatter_path:
+          link = content = '.'+ content[content.rfind('\\'):]
+
+          text3 = (
+f"""
+#### Scatter of correlation
+
+Scatter plot
+
+[![]({link})]({link})
+
+"""          
+          )
+          self.write_record(text3)
+
         self.encoding_mark_down_to_html()
+
   ##E def
 
   def analyze_data_structure(self, dataframe):
@@ -108,7 +144,9 @@ csv file: {csv_path}
     df.loc["Mean"] = series.mean().round(3)  
     if series.max() <=1 and series.min() >=0:
       if len(series.unique())<=2:
-        df.loc["Data_Type"] = "Binary Data"
+        df.loc["Data_Type"] = "Binary Int Data"
+    elif len(series.unique())/len(series) < 0.1:
+      df.loc["Data_Type"] = "Categorical Int Data"
     else:
       df.loc["Data_Type"] = "Numeric Data"
     self.df_record = pd.concat([self.df_record,df], axis = 1)
@@ -168,6 +206,8 @@ csv file: {csv_path}
       else:
         if len(series.unique()) < 3:
           df.loc["Data_Type"] = "Binary String Data"
+        elif len(series.unique())/len(series) < 0.1:
+          df.loc["Data_Type"] = "Categorical String Data"
         else:
           df.loc["Data_Type"] = "String Data"
     ##E for
@@ -188,16 +228,56 @@ csv file: {csv_path}
   def __del__(self):
     pass
 
+class StatisticRecord:
+  def __init__(self) -> None:
+    pass
+
+  def ols_record(self):
+    pass
+
+  def __del__(self):
+    pass
+
+
 class GraphMaker:
-  def __init__(self, location) -> None:
+  def __init__(self, location, dataframe, df, csv_path) -> None:
     self.save_file_location = location
+    self.structure_data = dataframe # dataframe, 
+    self.df = df
+    self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
 
-  
 
+  def heat_map(self) -> str:
+    list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
+    fig, ax = plt.subplots(1,1, dpi = 300)
+    ax = sns.heatmap(data = self.df[list_index].corr(), annot= True)
+    file_path = os.path.join(self.save_file_location, self.csv_name + "-" + "heatmap.png")
+    fig.savefig(file_path)
+    plt.close()
+    return file_path
+
+  def scatter_plot(self)->list:
+    list_save_location = []
+    list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
+    # num_plots = len(self.df[list_index])
+    for xindex, x_column in enumerate(list_index):
+      for yindex, y_column in enumerate(list_index):
+        if xindex < yindex:
+          fig, ax = plt.subplots(1, 1,dpi = 300)
+          ax = sns.scatterplot(data = self.df , x = x_column, y=y_column)
+          # print (self.df.head(), "x", x_column, "y", y_column )
+          ax.set_title(x_column + " vs " + y_column)
+          file_path = os.path.join(self.save_file_location, self.csv_name + "-" + x_column + "_vs_" + y_column + "-" + "scatterplot.png")
+          fig.savefig(file_path)
+          plt.close()
+          list_save_location.append(file_path)
+      ##E for
+    ##E for
+    return list_save_location
   def __del__(self):
     pass
 
 if __name__ =="__main__":
   BA = BasicAnalyze()
-  BA.settings(csv_files = [r".\test.csv"])
+  BA.analyze(csv_files = [r".\test.csv"])
 
