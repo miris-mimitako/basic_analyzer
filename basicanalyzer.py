@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 import pathlib
 import os
 import json
-from enum import Enum
+from enum import Enum, unique
 import glob
 import datetime
 import markdown
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from see import see
-import scipy.stats as stats
+from scipy.stats import f_oneway
 import shutil
 
 class BasicAnalyze:
@@ -89,10 +89,14 @@ class BasicAnalyze:
         list_record.append(len(df_record_csv)+1)
         list_record.append(self.create_folder_path)
 
+        # csv overview
+        self.write_record(f'<h2 id = {self.id_count()}>CSV overview</h2>')
+        self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">CSV overview</a></li>')
+
         # structure analyze
         self.analyze_data_structure(self.df)
-        self.write_record(f'<h2 id = {self.id_count()}>Applicable CSV file</h2>')
-        self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Applicable CSV file</a></li>')
+        self.write_record(f'<h3 id = {self.id_count()}>Applicable CSV file</h3>')
+        self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Applicable CSV file</a></li>')
         self.write_record(f'<p>csv file: {csv_path}</p>')
         self.write_record(f'<h3 id = {self.id_count()}>Summary of CSV Data {csv_path}</h3>')
         self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Summary of CSV Data {csv_path}</a></li>')
@@ -107,14 +111,14 @@ class BasicAnalyze:
         heatmap_path = self.heat_map(list_num_columns)
         heatmap_path = "." + heatmap_path[heatmap_path.rfind('\\'):]
 
-        self.write_record(f'<h2 id = {self.id_count()}>Heat Map / Correlations</h2>')
-        self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Heat Map / Correlations</a></li>')
+        self.write_record(f'<h3 id = {self.id_count()}>Heat Map / Correlations</h3>')
+        self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Heat Map / Correlations</a></li>')
         self.write_record(f'<a href="{heatmap_path}"><img alt="" src="{heatmap_path}" /></a>')
         
         # Each column data analysis
         for column_name in list_num_columns:
-          self.write_record(f'<h2 id = {self.id_count()}>Each column analyzed record for {column_name}</h2>')
-          self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Each column analyzed record for {column_name}</a></li>')
+          self.write_record(f'<h2 id = {self.id_count()}>{column_name}: Each column analyzed record for {column_name}</h2>')
+          self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">{column_name}: Each column analyzed record for {column_name}</a></li>')
           # Histgram
           hist_path = self.hist_plot(column_name)
           hist_path = "." + hist_path[hist_path.rfind('\\'):]
@@ -130,6 +134,18 @@ class BasicAnalyze:
             self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Category Bar Plot for {column_name} with {category_column}</a></li>')
             self.write_record(f'<p>This is categorical bar plot of  {column_name} with {category_column}</p>')
             self.write_record(f'<a href="{catbar_path}"><img alt="" src="{catbar_path}" /></a>')
+
+            violin_path = self.violin_plot(column_name, category_column)
+            violin_path = "." + violin_path[violin_path.rfind('\\'):]
+            self.write_record(f'<h3 id = {self.id_count()}>Violin Plot for {column_name} with {category_column}</h3>')
+            self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Violin Plot for {column_name} with {category_column}</a></li>')
+            self.write_record(f'<p>This is categorical bar plot of  {column_name} with {category_column}</p>')
+            self.write_record(f'<a href="{violin_path}"><img alt="" src="{violin_path}" /></a>')
+
+            #Anova...
+            f,p = self.one_way_anova(category_column, column_name)
+            self.write_record(f'<p>This categories p-value is {p} and f is {f}.</p>')
+
         ##E for
 
 
@@ -139,8 +155,8 @@ class BasicAnalyze:
         for x_index, x_column_name in enumerate(list_num_columns):
           for y_index, y_column_name in enumerate(list_num_columns):
             if x_index < y_index :
-              self.write_record(f'<h2 id = {self.id_count()}>Correlation between {x_column_name} and {y_column_name}</h2>')
-              self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Correlation between {x_column_name} and {y_column_name}</a></li>')
+              self.write_record(f'<h2 id = {self.id_count()}>{x_column_name}-{y_column_name}: Correlation between {x_column_name} and {y_column_name}</h2>')
+              self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">{x_column_name}-{y_column_name}: Correlation between {x_column_name} and {y_column_name}</a></li>')
 
               # scatter plot
               self.write_record(f'<h3 id = {self.id_count()}>Scatter plot {x_column_name} and {y_column_name}</h3>')
@@ -157,6 +173,15 @@ class BasicAnalyze:
               str_ols_result = self.ols_record(x_column_name, y_column_name)
               self.write_record(f'{str_ols_result}')
               self.write_record('</code></pre>')
+
+              # scatter plot with categorized data
+              for category_column in list_category_columns:
+                self.write_record(f'<h3 id = {self.id_count()}>Categorized scatter plot {x_column_name} and {y_column_name}</h3>')
+                self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Categorized scatter plot {x_column_name} and {y_column_name}</a></li>')
+                categorized_scatter_path = self.categorical_scatter_plot(x_column_name, y_column_name, category_column)
+                categorized_scatter_path = "." + categorized_scatter_path[categorized_scatter_path.rfind('\\'):]
+                self.write_record(f'<a href="{categorized_scatter_path}"><img alt="" src="{categorized_scatter_path}" /></a>')
+              ##E for
             ##E if
           ##E for ycolum
         ##E for xcolumn
@@ -312,11 +337,6 @@ class BasicAnalyze:
     plt.close()
     return file_path
 
-  def ols_record(self, x_column, y_column ):
-    df_freena = self.df.dropna()
-    model = sm.OLS(df_freena[y_column] ,df_freena[x_column])
-    res = model.fit()
-    return str(res.summary())
 
   def categorical_hist_plot(self,x_column, category_column):
     fig, ax = plt.subplots(1,1,dpi=300)
@@ -327,17 +347,37 @@ class BasicAnalyze:
     plt.close()
     return file_path
 
-
-
-  def categorical_plot(self,x_column, category_column):
-    fig, ax = plt.subplots(1, 1,dpi = 300)
-    ax = sns.barplot(data = self.df , y = x_column, hue=category_column)
-    ax.set_title("Category barplot " + x_column + "categorized by " + category_column)
-    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + x_column +"-"+ category_column +"category_bar.png")
+  def violin_plot(self, x_column, category_column):
+    fig, ax = plt.subplots(1,1,dpi=300)
+    sns.violinplot(data = self.df, y = x_column, x=category_column, bw=.2, cut=1,alpha = 0.3 , ax = ax)
+    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + x_column + "-"+ category_column + "violinplot.png")
+    ax.set_title("Violinplot of " + x_column + " with " + category_column )
     fig.savefig(file_path)
     plt.close()
     return file_path
 
+  def categorical_scatter_plot(self,x_column, y_column, category_column):
+    fig, ax = plt.subplots(1, 1,dpi = 300)
+    ax = sns.scatterplot(data = self.df , x = x_column, y=y_column,  hue=category_column)
+    ax.set_title("Category barplot " + x_column + "categorized by " + category_column)
+    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + x_column +"-" + y_column +"-"+ category_column +"categorized_scatter.png")
+    fig.savefig(file_path)
+    plt.close()
+    return file_path
+
+  # Statistical Analyze
+  def ols_record(self, x_column, y_column ):
+    df_freena = self.df.dropna()
+    model = sm.OLS(df_freena[y_column] ,df_freena[x_column])
+    res = model.fit()
+    return str(res.summary())
+
+  def one_way_anova(self,category_column, y_column ):
+    df_freena = self.df.dropna()
+    list_df_series = []
+    [list_df_series.append(df_freena[y_column][df_freena[category_column]== for_category_column]) for for_category_column in df_freena[category_column].unique() ]
+    return f,p
+    
   def __del__(self):
     self.write_record('</main>')
     self.list_aside.append("</ul>")
@@ -431,6 +471,6 @@ class BasicAnalyze:
 
 if __name__ =="__main__":
   BA = BasicAnalyze()
-  BA.analyze(csv_files = [r".\test.csv",r".\test.csv"])
+  BA.analyze(csv_files = [r".\test.csv"])
   del BA
 
