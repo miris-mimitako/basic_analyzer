@@ -1,18 +1,11 @@
-from random import sample
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pathlib
 import os
 import json
-from enum import Enum, unique
-import glob
 import datetime
-import markdown
 import statsmodels.api as sm
-import statsmodels.formula.api as smf
-from see import see
 from scipy.stats import f_oneway
 import shutil
 
@@ -84,10 +77,10 @@ class BasicAnalyze:
         self.df = pd.read_csv(csv_path, encoding = settings_data["csv"]["encoding"])
 
         # record history
-        list_record =[]
+        # list_record =[]
         df_record_csv = pd.read_csv(record_path)
-        list_record.append(len(df_record_csv)+1)
-        list_record.append(self.create_folder_path)
+        # list_record.append(len(df_record_csv)+1)
+        # list_record.append(self.create_folder_path)
 
         # csv overview
         self.write_record(f'<h2 id = {self.id_count()}>CSV overview</h2>')
