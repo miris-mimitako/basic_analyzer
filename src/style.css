@@ -3,10 +3,10 @@ body {
   margin-right: 3%;
   background-color: #cdcef3;
   font-family: "Courier New", "Meiryo UI";
-  overflow: scroll;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  position: relative;
 }
 
 header {
@@ -19,32 +19,56 @@ main {
       -ms-flex: 1;
           flex: 1;
   max-width: 70vw;
+  max-height: 100vh;
 }
 
 aside {
   grid-area: aside;
   overflow: hidden;
+  max-height: 100vh;
   -webkit-box-flex: 2;
       -ms-flex: 2;
           flex: 2;
-  width: 200px;
+  width: 25vw;
+  position: fixed;
+  top: 20px;
+  right: 1%;
 }
 
 aside ul li {
   list-style: none;
+  padding: 5px 0px;
 }
 
 aside ul li a {
   text-decoration: none;
-  padding: 0.2em;
   font-size: 1.1em;
   font-family: 'Courier New', "Meiryo UI";
   font-weight: bold;
   color: lightslategrey;
+  white-space: nowrap;
 }
 
 aside:hover {
-  overflow: auto;
+  overflow-y: scroll;
+}
+
+.list1 {
+  color: #031a6b;
+  font-size: 1.2em;
+  padding: 20px 0px;
+}
+
+.list2 {
+  color: #031a6b;
+  font-size: 1.2em;
+  padding: 20px 0px 20px 0.5em;
+}
+
+.list3 {
+  color: #3d4562;
+  font-size: 1em;
+  padding: 10px 0px 10px 1em;
 }
 
 footer {

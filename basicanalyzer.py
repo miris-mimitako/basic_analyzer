@@ -45,7 +45,7 @@ class BasicAnalyze:
     
     self.list_aside.append("<aside>")
     self.list_aside.append("<ul>")
-    self.list_aside.append(f'<li><a href = "#{self.id}">Top</a></li>')
+    self.list_aside.append(f'<li><a class= "list1" href = "#{self.id}">Top</a></li>')
 
   ##E def 
   def id_count(self):
@@ -116,8 +116,10 @@ class BasicAnalyze:
         # structure analyze
         self.analyze_data_structure(self.df)
         self.write_record(f'<h2 id = {self.id_count()}>Applicable CSV file</h2>')
+        self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Applicable CSV file</a></li>')
         self.write_record(f'<p>csv file: {csv_path}</p>')
         self.write_record(f'<h3 id = {self.id_count()}>Summary of CSV Data {csv_path}</h3>')
+        self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Summary of CSV Data {csv_path}</a></li>')
         self.write_record(self.df_record.to_html())
         
         # Make Graph
@@ -129,6 +131,7 @@ class BasicAnalyze:
         heatmap_path = "." + heatmap_path[heatmap_path.rfind('\\'):]
 
         self.write_record(f'<h2 id = {self.id_count()}>Heat Map / Correlations</h2>')
+        self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Heat Map / Correlations</a></li>')
         self.write_record(f'<a href="{heatmap_path}"><img alt="" src="{heatmap_path}" /></a>')
         
         # Each column data analysis
@@ -137,6 +140,7 @@ class BasicAnalyze:
           hist_path = self.hist_plot(column_name)
           hist_path = "." + hist_path[hist_path.rfind('\\'):]
           self.write_record(f'<h2 id = {self.id_count()}>Histgram for {column_name}</h2>')
+          self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Histgram for {column_name}</a></li>')
           self.write_record(f'<p>This is histgram and Q-Q plot of {column_name}</p>')
           self.write_record(f'<a href="{hist_path}"><img alt="" src="{hist_path}" /></a>')
         ##E for
@@ -147,15 +151,18 @@ class BasicAnalyze:
           for y_index, y_column_name in enumerate(list_num_columns):
             if x_index < y_index :
               self.write_record(f'<h2 id = {self.id_count()}>Correlation between {x_column_name} and {y_column_name}</h2>')
+              self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Correlation between {x_column_name} and {y_column_name}</a></li>')
 
               # scatter plot
               self.write_record(f'<h3 id = {self.id_count()}>Scatter plot {x_column_name} and {y_column_name}</h3>')
+              self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Scatter plot {x_column_name} and {y_column_name}</a></li>')
               scatter_path = self.scatter_plot(x_column_name, y_column_name)
               scatter_path = "." + scatter_path[scatter_path.rfind('\\'):]
               self.write_record(f'<a href="{scatter_path}"><img alt="" src="{scatter_path}" /></a>')
 
               # ols analyze
               self.write_record(f'<h3 id = {self.id_count()}>OLS analyzation {x_column_name} and {y_column_name}</h3>')
+              self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">OLS analyzation {x_column_name} and {y_column_name}</a></li>')
               self.write_record('<p>This record is used by automatically removed Nan data.</p>')
               self.write_record('<pre><code>')
               str_ols_result = self.ols_record(x_column_name, y_column_name)
