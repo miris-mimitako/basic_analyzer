@@ -58,30 +58,6 @@ class BasicAnalyze:
       f_html.write("\n")
       f_html.close()
 
-#   def encoding_mark_down_to_html(self):
-#     with open(os.path.join(self.create_folder_path,'result.md'), "r") as f:
-#       sample = f.read()
-#       f.close()
-
-#     md = markdown.Markdown(extensions=['tables',"toc"])
-
-#     with open(os.path.join(self.create_folder_path,'result.html'), 'a') as f_html:
-#       # f_html.write(
-
-#       # )
-#       f_html.write(md.convert(sample))
-#       f_html.write(
-# """
-# \n\n
-# </body>
-# </html>
-# """
-#       )
-      
-#       f_html.close()
-
-#       return str(os.path.join(self.create_folder_path,'result.html'))
-
   def analyze(self,overwrite = False, csv_files = [], dataframe = None, *args, **kwargs):
     """
     overwrite: when true, change settings
@@ -125,6 +101,7 @@ class BasicAnalyze:
         # Make Graph
         dfT = self.df_record.T
         list_num_columns = dfT[dfT.Data_Type.str.contains('Int') | dfT.Data_Type.str.contains('Float') | dfT.Data_Type.str.contains('Date')].index
+        list_category_columns = dfT[dfT.Data_Type.str.contains('Cat')| dfT.Data_Type.str.contains('Binary')].index
         
         # Heat map
         heatmap_path = self.heat_map(list_num_columns)
@@ -136,14 +113,26 @@ class BasicAnalyze:
         
         # Each column data analysis
         for column_name in list_num_columns:
+          self.write_record(f'<h2 id = {self.id_count()}>Each column analyzed record for {column_name}</h2>')
+          self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Each column analyzed record for {column_name}</a></li>')
           # Histgram
           hist_path = self.hist_plot(column_name)
           hist_path = "." + hist_path[hist_path.rfind('\\'):]
-          self.write_record(f'<h2 id = {self.id_count()}>Histgram for {column_name}</h2>')
-          self.list_aside.append(f'<li><a class= "list2" href = "#{self.id}">Histgram for {column_name}</a></li>')
+          self.write_record(f'<h3 id = {self.id_count()}>Histgram for {column_name}</h3>')
+          self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Histgram for {column_name}</a></li>')
           self.write_record(f'<p>This is histgram and Q-Q plot of {column_name}</p>')
           self.write_record(f'<a href="{hist_path}"><img alt="" src="{hist_path}" /></a>')
+
+          for category_column in list_category_columns:
+            catbar_path = self.categorical_hist_plot(column_name, category_column)
+            catbar_path = "." + catbar_path[catbar_path.rfind('\\'):]
+            self.write_record(f'<h3 id = {self.id_count()}>Category Bar Plot for {column_name} with {category_column}</h3>')
+            self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Category Bar Plot for {column_name} with {category_column}</a></li>')
+            self.write_record(f'<p>This is categorical bar plot of  {column_name} with {category_column}</p>')
+            self.write_record(f'<a href="{catbar_path}"><img alt="" src="{catbar_path}" /></a>')
         ##E for
+
+
 
         # Correlation data analysis
 
@@ -328,6 +317,26 @@ class BasicAnalyze:
     model = sm.OLS(df_freena[y_column] ,df_freena[x_column])
     res = model.fit()
     return str(res.summary())
+
+  def categorical_hist_plot(self,x_column, category_column):
+    fig, ax = plt.subplots(1,1,dpi=300)
+    sns.histplot(data = self.df, x = x_column, hue=category_column, alpha = 0.3 , kde = True, ax = ax)
+    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + x_column + "-"+ category_column + "categorizedhistplot.png")
+    ax.set_title("Histgram of " + x_column + " with " + category_column )
+    fig.savefig(file_path)
+    plt.close()
+    return file_path
+
+
+
+  def categorical_plot(self,x_column, category_column):
+    fig, ax = plt.subplots(1, 1,dpi = 300)
+    ax = sns.barplot(data = self.df , y = x_column, hue=category_column)
+    ax.set_title("Category barplot " + x_column + "categorized by " + category_column)
+    file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + x_column +"-"+ category_column +"category_bar.png")
+    fig.savefig(file_path)
+    plt.close()
+    return file_path
 
   def __del__(self):
     self.write_record('</main>')

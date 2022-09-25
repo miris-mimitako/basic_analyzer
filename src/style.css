@@ -23,6 +23,8 @@ main {
 }
 
 aside {
+  margin-left: 8px;
+  background-color: #444670;
   grid-area: aside;
   overflow: hidden;
   max-height: 100vh;
@@ -35,6 +37,10 @@ aside {
   right: 1%;
 }
 
+aside ul {
+  padding: 16px;
+}
+
 aside ul li {
   list-style: none;
   padding: 5px 0px;
@@ -45,7 +51,7 @@ aside ul li a {
   font-size: 1.1em;
   font-family: 'Courier New', "Meiryo UI";
   font-weight: bold;
-  color: lightslategrey;
+  color: #5d7185;
   white-space: nowrap;
 }
 
@@ -60,13 +66,13 @@ aside:hover {
 }
 
 .list2 {
-  color: #031a6b;
+  color: #5b7aea;
   font-size: 1.2em;
   padding: 20px 0px 20px 0.5em;
 }
 
 .list3 {
-  color: #3d4562;
+  color: #a6afcd;
   font-size: 1em;
   padding: 10px 0px 10px 1em;
 }
@@ -118,7 +124,7 @@ table td {
 
 img {
   width: 100%;
-  max-width: 840px;
+  max-width: 600px;
   height: auto;
   margin: auto;
 }
