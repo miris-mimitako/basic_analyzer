@@ -78,7 +78,7 @@ class BasicAnalyze:
 
         # record history
         # list_record =[]
-        df_record_csv = pd.read_csv(record_path)
+        # df_record_csv = pd.read_csv(record_path)
         # list_record.append(len(df_record_csv)+1)
         # list_record.append(self.create_folder_path)
 
@@ -135,7 +135,7 @@ class BasicAnalyze:
             self.write_record(f'<p>This is categorical bar plot of  {column_name} with {category_column}</p>')
             self.write_record(f'<a href="{violin_path}"><img alt="" src="{violin_path}" /></a>')
 
-            #Anova...
+            #One Way Anova...
             f,p = self.one_way_anova(category_column, column_name)
             self.write_record(f'<p>This categories p-value is {p} and f is {f}.</p>')
 
@@ -385,6 +385,6 @@ class BasicAnalyze:
 
 if __name__ =="__main__":
   BA = BasicAnalyze()
-  BA.analyze(csv_files = [r".\test.csv"])
+  BA.analyze(csv_files = [r".\test_train.csv"])
   del BA
 
