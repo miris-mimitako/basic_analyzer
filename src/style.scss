@@ -36,12 +36,12 @@ aside{
   }
   ul li {
     list-style: none;
-    padding: 5px 0px;
+    padding: 3px 0px;
     a {
       text-decoration: none;
       font-size: 1.1em;
       font-family: 'Courier New', "Meiryo UI";
-      font-weight: bold;
+      font-weight: 300;
       color:rgb(93, 113, 133);
       white-space: nowrap;
     }
@@ -54,20 +54,21 @@ aside:hover{
 
 .list1{
   color: rgb(3, 26, 107);
-  font-size: 1.2em;
+  font-size: 0.9em;
   padding: 20px 0px;
 }
 
 .list2{
   color: rgb(91, 122, 234);
-  font-size: 1.2em;
+  font-size: 0.9em;
+  font-weight: bold;
   padding: 20px 0px 20px 0.5em;
   
 }
 
 .list3{
   color: rgb(166, 175, 205);
-  font-size: 1em;
+  font-size: 0.8em;
   padding: 10px 0px 10px 1em;
   
 }

@@ -43,14 +43,14 @@ aside ul {
 
 aside ul li {
   list-style: none;
-  padding: 5px 0px;
+  padding: 3px 0px;
 }
 
 aside ul li a {
   text-decoration: none;
   font-size: 1.1em;
   font-family: 'Courier New', "Meiryo UI";
-  font-weight: bold;
+  font-weight: 300;
   color: #5d7185;
   white-space: nowrap;
 }
@@ -61,19 +61,20 @@ aside:hover {
 
 .list1 {
   color: #031a6b;
-  font-size: 1.2em;
+  font-size: 0.9em;
   padding: 20px 0px;
 }
 
 .list2 {
   color: #5b7aea;
-  font-size: 1.2em;
+  font-size: 0.9em;
+  font-weight: bold;
   padding: 20px 0px 20px 0.5em;
 }
 
 .list3 {
   color: #a6afcd;
-  font-size: 1em;
+  font-size: 0.8em;
   padding: 10px 0px 10px 1em;
 }
 
