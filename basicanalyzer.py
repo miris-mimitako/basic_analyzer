@@ -121,23 +121,24 @@ class BasicAnalyze:
           self.write_record(f'<a href="{hist_path}"><img alt="" src="{hist_path}" /></a>')
 
           for category_column in list_category_columns:
-            catbar_path = self.categorical_hist_plot(column_name, category_column)
-            catbar_path = "." + catbar_path[catbar_path.rfind('\\'):]
-            self.write_record(f'<h3 id = {self.id_count()}>Category Bar Plot for {column_name} with {category_column}</h3>')
-            self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Category Bar Plot for {column_name} with {category_column}</a></li>')
-            self.write_record(f'<p>This is categorical bar plot of  {column_name} with {category_column}</p>')
-            self.write_record(f'<a href="{catbar_path}"><img alt="" src="{catbar_path}" /></a>')
+            if category_column != column_name: # Without duplicate
+              catbar_path = self.categorical_hist_plot(column_name, category_column)
+              catbar_path = "." + catbar_path[catbar_path.rfind('\\'):]
+              self.write_record(f'<h3 id = {self.id_count()}>Category Histgram for {column_name} with {category_column}</h3>')
+              self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Category Histgram for {column_name} with {category_column}</a></li>')
+              self.write_record(f'<p>This is categorical histgram of  {column_name} with {category_column}</p>')
+              self.write_record(f'<a href="{catbar_path}"><img alt="" src="{catbar_path}" /></a>')
 
-            violin_path = self.violin_plot(column_name, category_column)
-            violin_path = "." + violin_path[violin_path.rfind('\\'):]
-            self.write_record(f'<h3 id = {self.id_count()}>Violin Plot for {column_name} with {category_column}</h3>')
-            self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Violin Plot for {column_name} with {category_column}</a></li>')
-            self.write_record(f'<p>This is categorical bar plot of  {column_name} with {category_column}</p>')
-            self.write_record(f'<a href="{violin_path}"><img alt="" src="{violin_path}" /></a>')
+              violin_path = self.violin_plot(column_name, category_column)
+              violin_path = "." + violin_path[violin_path.rfind('\\'):]
+              self.write_record(f'<h3 id = {self.id_count()}>Violin Plot for {column_name} with {category_column}</h3>')
+              self.list_aside.append(f'<li><a class= "list3" href = "#{self.id}">Violin Plot for {column_name} with {category_column}</a></li>')
+              self.write_record(f'<p>This is categorical bar plot of  {column_name} with {category_column}</p>')
+              self.write_record(f'<a href="{violin_path}"><img alt="" src="{violin_path}" /></a>')
 
-            #One Way Anova...
-            f,p = self.one_way_anova(category_column, column_name)
-            self.write_record(f'<p>This categories p-value is {p} and f is {f}.</p>')
+              #One Way Anova...
+              f,p = self.one_way_anova(category_column, column_name)
+              self.write_record(f'<p>This categories p-value is {p} and f is {f}.</p>')
 
         ##E for
 
@@ -352,7 +353,7 @@ class BasicAnalyze:
   def categorical_scatter_plot(self,x_column, y_column, category_column):
     fig, ax = plt.subplots(1, 1,dpi = 300)
     ax = sns.scatterplot(data = self.df , x = x_column, y=y_column,  hue=category_column)
-    ax.set_title("Category barplot " + x_column + "categorized by " + category_column)
+    ax.set_title("Category scatter " + x_column + "categorized by " + category_column)
     file_path = os.path.join(self.create_folder_path, self.csv_name + "-" + x_column +"-" + y_column +"-"+ category_column +"categorized_scatter.png")
     fig.savefig(file_path)
     plt.close()
