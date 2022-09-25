@@ -376,7 +376,9 @@ class BasicAnalyze:
     df_freena = self.df.dropna()
     list_df_series = []
     [list_df_series.append(df_freena[y_column][df_freena[category_column]== for_category_column]) for for_category_column in df_freena[category_column].unique() ]
+    f, p = f_oneway(*list_df_series) # list unpack
     return f,p
+
 
   def __del__(self):
     self.write_record('</main>')
