@@ -377,7 +377,7 @@ class BasicAnalyze:
     list_df_series = []
     [list_df_series.append(df_freena[y_column][df_freena[category_column]== for_category_column]) for for_category_column in df_freena[category_column].unique() ]
     return f,p
-    
+
   def __del__(self):
     self.write_record('</main>')
     self.list_aside.append("</ul>")
@@ -387,87 +387,6 @@ class BasicAnalyze:
 
     self.write_record('</body>')
     self.write_record('</html>')
-
-
-
-# class StatisticRecord:
-#   def __init__(self, location, dataframe, df, csv_path) -> None:
-#     self.save_file_location = location
-#     self.structure_data = dataframe # dataframe, 
-#     self.df = df
-#     self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
-
-#   def ols_record(self):
-#     _df = self.df
-#     list_record = []
-#     _df.dropna(inplace=True)
-#     for xindex, x_column in enumerate(_df.columns):
-#       for yindex, y_column in enumerate(_df.columns):
-#         if xindex < yindex:
-#           if ("int" or "float") in str(_df[x_column].dtype) and ("int" or "float") in str(_df[y_column].dtype):
-#             model = sm.OLS(_df[y_column] ,_df[x_column])
-#             res = model.fit()
-#             _text = x_column + "_vs_" + y_column + "\n\n" + str(res.summary()) 
-#             list_record.append(_text)
-#     return list_record
-#   def __del__(self):
-#     pass
-
-# class GraphMaker:
-#   def __init__(self, location, dataframe, df, csv_path) -> None:
-#     self.save_file_location = location
-#     self.structure_data = dataframe # dataframe, 
-#     self.df = df
-#     self.csv_name = csv_path[csv_path.rfind("\\")+1:csv_path.rfind(".")]
-
-
-#   def heat_map(self) -> str:
-#     list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
-#     fig, ax = plt.subplots(1,1, dpi = 300)
-#     ax = sns.heatmap(data = self.df[list_index].corr(), annot= True)
-#     file_path = os.path.join(self.save_file_location, self.csv_name + "-" + "heatmap.png")
-#     fig.savefig(file_path)
-#     plt.close()
-#     return file_path
-
-#   def scatter_plot(self)->list:
-#     list_save_location = []
-#     list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
-#     # num_plots = len(self.df[list_index])
-#     for xindex, x_column in enumerate(list_index):
-#       for yindex, y_column in enumerate(list_index):
-#         if xindex < yindex:
-#           fig, ax = plt.subplots(1, 1,dpi = 300)
-#           ax = sns.scatterplot(data = self.df , x = x_column, y=y_column)
-#           # print (self.df.head(), "x", x_column, "y", y_column )
-#           ax.set_title(x_column + " vs " + y_column)
-#           file_path = os.path.join(self.save_file_location, self.csv_name + "-" + x_column + "_vs_" + y_column + "-" + "scatterplot.png")
-#           fig.savefig(file_path)
-#           plt.close()
-#           list_save_location.append(file_path)
-#       ##E for
-#     ##E for
-#     return list_save_location
-
-#   def hist_plot(self):
-#     list_save_location = []
-
-#     list_index = self.structure_data[self.structure_data.Data_Type.str.contains('Int') | self.structure_data.Data_Type.str.contains('Float') | self.structure_data.Data_Type.str.contains('Date')].index
-#     for column in list_index:
-#       fig, (ax1, ax2) = plt.subplots(1,2, figsize = (20, 10))
-#       sns.histplot(data = self.df, x = column, kde = True, ax = ax1)
-#       sm.qqplot(self.df[column].values, ax=ax2)
-
-#       file_path = os.path.join(self.save_file_location, self.csv_name + "-" + column + "-" + "Q-Q_plot.png")
-#       ax1.set_title("Histgram of " + column)
-#       ax2.set_title("Q-Q plot of " + column)
-#       fig.savefig(file_path)
-#       plt.close()
-#       list_save_location.append(file_path)
-#     return list_save_location
-
-#   def __del__(self):
-#     pass
 
 if __name__ =="__main__":
   BA = BasicAnalyze()
