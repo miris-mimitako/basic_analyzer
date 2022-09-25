@@ -41,6 +41,11 @@ class BasicAnalyze:
     self.write_record('<body>')
     self.write_record('<main>')
     self.write_record(f'<h1 id = {self.id_count()}>Record</h1>')
+    self.list_aside = []
+    
+    self.list_aside.append("<aside>")
+    self.list_aside.append("<ul>")
+    self.list_aside.append(f'<li><a href = "#{self.id}">Top</a></li>')
 
   ##E def 
   def id_count(self):
@@ -52,34 +57,30 @@ class BasicAnalyze:
       f_html.write(content)
       f_html.write("\n")
       f_html.close()
-    # with open(os.path.join(self.create_folder_path,'result.md'), 'a', encoding="utf-8") as f:
-    #   f.write(content)
-    #   f.write("\n\n")
-    #   f.close()
 
-  def encoding_mark_down_to_html(self):
-    with open(os.path.join(self.create_folder_path,'result.md'), "r") as f:
-      sample = f.read()
-      f.close()
+#   def encoding_mark_down_to_html(self):
+#     with open(os.path.join(self.create_folder_path,'result.md'), "r") as f:
+#       sample = f.read()
+#       f.close()
 
-    md = markdown.Markdown(extensions=['tables',"toc"])
+#     md = markdown.Markdown(extensions=['tables',"toc"])
 
-    with open(os.path.join(self.create_folder_path,'result.html'), 'a') as f_html:
-      # f_html.write(
+#     with open(os.path.join(self.create_folder_path,'result.html'), 'a') as f_html:
+#       # f_html.write(
 
-      # )
-      f_html.write(md.convert(sample))
-      f_html.write(
-"""
-\n\n
-</body>
-</html>
-"""
-      )
+#       # )
+#       f_html.write(md.convert(sample))
+#       f_html.write(
+# """
+# \n\n
+# </body>
+# </html>
+# """
+#       )
       
-      f_html.close()
+#       f_html.close()
 
-      return str(os.path.join(self.create_folder_path,'result.html'))
+#       return str(os.path.join(self.create_folder_path,'result.html'))
 
   def analyze(self,overwrite = False, csv_files = [], dataframe = None, *args, **kwargs):
     """
@@ -112,10 +113,11 @@ class BasicAnalyze:
         list_record.append(len(df_record_csv)+1)
         list_record.append(self.create_folder_path)
 
-        # write record
+        # structure analyze
         self.analyze_data_structure(self.df)
         self.write_record(f'<h2 id = {self.id_count()}>Applicable CSV file</h2>')
         self.write_record(f'<p>csv file: {csv_path}</p>')
+        self.write_record(f'<h3 id = {self.id_count()}>Summary of CSV Data {csv_path}</h3>')
         self.write_record(self.df_record.to_html())
         
         # Make Graph
@@ -163,7 +165,7 @@ class BasicAnalyze:
           ##E for ycolum
         ##E for xcolumn
       ##E for csv
-    ##E csv True
+    ##E if csv True
   ##E def
 
   def analyze_data_structure(self, dataframe):
@@ -321,7 +323,16 @@ class BasicAnalyze:
     return str(res.summary())
 
   def __del__(self):
-    pass
+    self.write_record('</main>')
+    self.list_aside.append("</ul>")
+    self.list_aside.append("</aside>")
+    for write_html in self.list_aside:
+      self.write_record(write_html)
+
+    self.write_record('</body>')
+    self.write_record('</html>')
+
+
 
 # class StatisticRecord:
 #   def __init__(self, location, dataframe, df, csv_path) -> None:
@@ -405,4 +416,5 @@ class BasicAnalyze:
 if __name__ =="__main__":
   BA = BasicAnalyze()
   BA.analyze(csv_files = [r".\test.csv",r".\test.csv"])
+  del BA
 

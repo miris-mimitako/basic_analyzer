@@ -6,6 +6,54 @@ body {
   background-color: rgb(205, 206, 243);
   font-family: "Courier New", "Meiryo UI";
   overflow: scroll;
+  display: flex;
+  // flex-wrap:no-wrap;
+//   grid-template-rows: 50px auto auto;
+//   grid-template-columns: auto 200px;
+//   grid-template-areas: 
+//     "header ." 
+//     "main   aside" 
+//     "footer ." 
+    
+//   ;
+// 
+}
+
+header{
+  grid-area: header;
+}
+
+main{
+  grid-area: main;
+  flex: 1;
+  max-width: 70vw;
+}
+
+aside{
+  grid-area: aside;
+  overflow: hidden;
+  flex: 2;
+  width: 200px;
+  
+  ul li {
+    list-style: none;
+    a {
+      text-decoration: none;
+      padding: 0.2em;
+      font-size: 1.1em;
+      font-family: 'Courier New', "Meiryo UI";
+      font-weight: bold;
+      color:lightslategrey;
+    }
+  }
+}
+
+aside:hover{
+  overflow: auto;
+}
+
+footer{
+  grid-area: footer;
 }
 
 p {
@@ -31,22 +79,24 @@ h2 {
 }
 
 table {
-  border: solid 2px rgb(4, 4, 68);
+  // border: solid 2px rgb(4, 4, 68);
+  border-color: rgb(189, 189, 189);
   display: block;
   overflow-x: scroll;
   white-space: nowrap;
+  max-width: 68vw;
   th {
-    border-bottom: 1px dashed rgb(4, 4, 68);
+    // border-bottom: 1px dashed rgb(4, 4, 68);
     padding: 0px 8px;
-    border-left: 1px dashed rgb(189, 189, 189);
+    // border-left: 1px dashed rgb(189, 189, 189);
     text-align: center !important;
   }
 
   td {
     font-size: 0.8em;
     padding: 8px 8px;
-    border-bottom: 1px dashed rgb(146, 146, 151);
-    border-left: 1px dashed rgb(189, 189, 189);
+    // border-bottom: 1px dashed rgb(146, 146, 151);
+    // border-left: 1px dashed rgb(189, 189, 189);
     text-align: right !important;
   }
 }
